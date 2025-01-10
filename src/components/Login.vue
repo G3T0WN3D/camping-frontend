@@ -33,30 +33,37 @@
     methods: {
         async login() {
             if (!this.username || !this.password) {
-                this.errorMessage = 'Alle velden zijn verplicht.';
-                return;
+            this.errorMessage = "Alle velden zijn verplicht.";
+            return;
             }
 
             try {
-                const response = await fetch('http://localhost:3000/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("http://localhost:3000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    username: this.username,
-                    password: this.password,
+                username: this.username,
+                password: this.password,
                 }),
-                });
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (response.ok) {
-                this.$emit('loginSuccess', data.userId); // Stuur userId mee naar de parent
-                } else {
+            if (response.ok) {
+                // Stap 3: Sla zowel userId als isOwner op in localStorage
+                localStorage.setItem("userId", data.userId);
+                localStorage.setItem("isOwner", data.isOwner);
+
+                // Stuur userId en isOwner mee naar de parent-component
+                this.$emit("loginSuccess", { userId: data.userId, isOwner: data.isOwner });
+
+                this.errorMessage = ""; // Reset eventuele foutmeldingen
+            } else {
                 this.errorMessage = data.message;
-                }
+            }
             } catch (error) {
-                console.error(error);
-                this.errorMessage = 'Er is iets misgegaan bij het inloggen.';
+            console.error(error);
+            this.errorMessage = "Er is iets misgegaan bij het inloggen.";
             }
         },
     },

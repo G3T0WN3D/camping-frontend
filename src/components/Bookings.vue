@@ -23,12 +23,27 @@
     },
     methods: {
       async fetchBookings() {
+        const userId = localStorage.getItem('userId'); // Ophalen van ingelogde gebruiker-ID
+  
+        if (!userId) {
+          console.error("Geen gebruiker-ID gevonden. Zorg ervoor dat je bent ingelogd.");
+          this.bookings = [];
+          return;
+        }
+  
         try {
-          const response = await fetch("http://localhost:3000/bookings");
+          const response = await fetch(`http://localhost:3000/bookings?userId=${userId}`);
           const data = await response.json();
-          this.bookings = data;
+  
+          if (response.ok) {
+            this.bookings = data;
+          } else {
+            console.error("Fout:", data.message);
+            this.bookings = [];
+          }
         } catch (error) {
           console.error("Fout bij het ophalen van boekingen:", error);
+          this.bookings = [];
         }
       },
     },
@@ -37,4 +52,5 @@
     },
   };
   </script>
+  
   
