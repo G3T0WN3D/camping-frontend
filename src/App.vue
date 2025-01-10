@@ -42,7 +42,6 @@ import Bookings from './components/Bookings.vue';
 import UpdateProfile from './components/UpdateProfile.vue';
 import OwnerCampingSpots from './components/OwnerCampingSpots.vue';
 
-
 export default {
   name: 'App',
   components: {
@@ -58,21 +57,19 @@ export default {
     return {
       isLoggedIn: false, // Status van de gebruiker
       userId: null, // Ingelogde gebruiker-ID
-      isOwner: false,
+      isOwner: false, // Gebruiker is eigenaar of niet
       activePage: 'home', // Standaardpagina
-      pages: ['home', 'register', 'login', 'camping-spots', 'bookings', 'update-profile'], // Lijst met alle pagina's
+      pages: ['home', 'register', 'login'], // Beschikbare pagina's
     };
   },
   computed: {
     visiblePages() {
-      // Toon alleen "home", "register", en "login" als de gebruiker niet is ingelogd
       if (!this.isLoggedIn) {
         return ['home', 'register', 'login'];
       }
       if (this.isOwner) {
-      return ['home', 'update-profile', 'owner-camping-spots'];
+        return ['home', 'update-profile', 'owner-camping-spots'];
       }
-      // Als de gebruiker is ingelogd, toon "home", "camping-spots", "bookings", en "update-profile"
       return ['home', 'camping-spots', 'bookings', 'update-profile'];
     },
   },
@@ -80,51 +77,34 @@ export default {
     changePage(page) {
       this.activePage = page;
     },
-    handleLogin({ userId, isOwner }) { // Ontvang een object met userId en isOwner
+    handleLogin({ userId, isOwner }) {
       this.isLoggedIn = true;
-      this.isOwner = isOwner; // Stel isOwner correct in
+      this.isOwner = isOwner;
       this.userId = userId;
 
-      // Sla de status op in localStorage
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userId', userId);
-      localStorage.setItem('isOwner', isOwner);
-
       // Verander naar de juiste pagina
-      this.changePage(isOwner ? 'home' : 'camping-spots');
+      this.changePage(isOwner ? 'owner-camping-spots' : 'camping-spots');
     },
     handleLogout() {
       this.isLoggedIn = false;
       this.isOwner = false;
       this.userId = null;
 
-      // Verwijder gegevens uit localStorage
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('isOwner');
-
-      this.changePage('home');
+      this.changePage('home'); // Reset naar home na uitloggen
     },
     checkLoginStatus() {
-      // Controleer in localStorage of de gebruiker ingelogd is
-      const storedStatus = localStorage.getItem('isLoggedIn');
-      const storedUserId = localStorage.getItem('userId');
-      const storedIsOwner = localStorage.getItem('isOwner') === 'true';
-
-      if (storedStatus === 'true' && storedUserId) {
-        this.isLoggedIn = true;
-        this.userId = parseInt(storedUserId, 10);
-        this.isOwner = storedIsOwner;
-        this.changePage(storedIsOwner ? 'home' : 'camping-spots');
-      }
+      // Reset status volledig bij refresh
+      this.isLoggedIn = false;
+      this.isOwner = false;
+      this.userId = null;
+      this.activePage = 'home'; // Stel standaardpagina expliciet in
     },
     capitalize(text) {
       return text.charAt(0).toUpperCase() + text.slice(1);
     },
   },
-
   mounted() {
-    this.checkLoginStatus(); // Controleer loginstatus bij het laden van de app
+    this.checkLoginStatus(); // Controleer status bij laden van de app
   },
 };
 </script>
